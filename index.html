@@ -1,0 +1,1975 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartChill — IoT Cold Storage Management</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --surface: #ffffff;
+        --surface-alt: #eef0f4;
+        --border: #dde1e9;
+        --border-strong: #c8cdd8;
+        --text-primary: #1c2333;
+        --text-secondary: #52606d;
+        --text-muted: #8896a5;
+        --blue: #3d6fa8;
+        --blue-dark: #2c5282;
+        --blue-light: #ebf1f8;
+        --green: #2d7a52;
+        --green-dark: #1e5c3b;
+        --green-light: #eaf4ee;
+        --amber: #976b1e;
+        --amber-dark: #7a5216;
+        --amber-light: #f7f0e0;
+        --red: #a33535;
+        --red-dark: #7c2828;
+        --red-light: #f5eaea;
+        --teal: #2a7070;
+        --teal-light: #e6f2f2;
+        --mono: "JetBrains Mono", monospace;
+        --sans: "Inter", -apple-system, sans-serif;
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 14px;
+        --shadow-sm:
+          0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #13161f;
+          --surface: #1c2030;
+          --surface-alt: #242840;
+          --border: #2e3450;
+          --text-primary: #dce4f0;
+          --text-secondary: #8896b0;
+          --text-muted: #5a6880;
+          --blue: #6b9fd4;
+          --blue-dark: #4f7fb5;
+          --blue-light: rgba(107, 159, 212, 0.14);
+          --green: #5aab7a;
+          --green-dark: #3d8a5e;
+          --green-light: rgba(90, 171, 122, 0.13);
+          --amber: #c49a45;
+          --amber-dark: #a07a32;
+          --amber-light: rgba(196, 154, 69, 0.14);
+          --red: #c46060;
+          --red-dark: #a04545;
+          --red-light: rgba(196, 96, 96, 0.13);
+          --teal: #4d9e9e;
+          --teal-light: rgba(77, 158, 158, 0.13);
+          --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35);
+        }
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: var(--sans);
+        background: var(--bg);
+        color: var(--text-primary);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      nav {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        height: 60px;
+        box-shadow: var(--shadow-sm);
+      }
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+      .logo-mark {
+        width: 30px;
+        height: 30px;
+        border-radius: var(--radius-sm);
+        background: var(--blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 15px;
+      }
+      .nav-links {
+        display: flex;
+        gap: 4px;
+      }
+      .nav-link {
+        padding: 6px 14px;
+        border-radius: var(--radius-sm);
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.15s;
+        cursor: pointer;
+        border: none;
+        background: none;
+        font-family: var(--sans);
+      }
+      .nav-link:hover {
+        background: var(--surface-alt);
+        color: var(--text-primary);
+      }
+      .nav-link.active {
+        background: var(--blue-light);
+        color: var(--blue-dark);
+      }
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .live-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        background: var(--green-light);
+        color: var(--green-dark);
+        font-size: 12px;
+        font-weight: 600;
+        font-family: var(--mono);
+      }
+      .live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: blink 2s infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .facility-tag {
+        padding: 5px 12px;
+        border-radius: 20px;
+        background: var(--surface-alt);
+        border: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .hero {
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+        padding: 48px 32px 40px;
+      }
+      .hero-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 48px;
+        align-items: center;
+      }
+      .hero-eyebrow {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--blue);
+        margin-bottom: 12px;
+      }
+      .hero h1 {
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1.25;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+      }
+      .hero-sub {
+        font-size: 15px;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        max-width: 560px;
+      }
+      .hero-stats {
+        display: flex;
+      }
+      .hero-stat {
+        padding: 20px 28px;
+        text-align: center;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface-alt);
+        min-width: 120px;
+      }
+      .hero-stat + .hero-stat {
+        margin-left: -1px;
+        border-radius: 0;
+      }
+      .hero-stat:first-child {
+        border-radius: var(--radius-md) 0 0 var(--radius-md);
+      }
+      .hero-stat:last-child {
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      }
+      .hero-stat-val {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-primary);
+        font-family: var(--mono);
+        line-height: 1.1;
+      }
+      .hero-stat-val.blue {
+        color: var(--blue);
+      }
+      .hero-stat-val.green {
+        color: var(--green);
+      }
+      .hero-stat-val.amber {
+        color: var(--amber);
+      }
+      .hero-stat-lbl {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 4px;
+        font-weight: 500;
+      }
+
+      .ticker-bar {
+        background: var(--surface-alt);
+        border-bottom: 1px solid var(--border);
+        overflow: hidden;
+        padding: 8px 0;
+      }
+      .ticker-inner {
+        display: flex;
+        gap: 48px;
+        white-space: nowrap;
+        animation: scroll 40s linear infinite;
+      }
+      .ticker-item {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .ticker-item span {
+        color: var(--blue);
+        font-weight: 500;
+      }
+      @keyframes scroll {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
+      }
+
+      .page-tabs {
+        display: flex;
+        gap: 2px;
+        padding: 0 32px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+      .page-tab {
+        padding: 14px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-muted);
+        border: none;
+        background: none;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.15s;
+        font-family: var(--sans);
+      }
+      .page-tab:hover {
+        color: var(--text-primary);
+      }
+      .page-tab.active {
+        color: var(--blue-dark);
+        border-bottom-color: var(--blue);
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      .main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px;
+      }
+      .section {
+        margin-bottom: 40px;
+      }
+      .section-title {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+      }
+      .card-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .card-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      .card-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 1px;
+      }
+      .card-body {
+        padding: 20px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        font-family: var(--mono);
+      }
+      .badge-green {
+        background: var(--green-light);
+        color: var(--green-dark);
+      }
+      .badge-amber {
+        background: var(--amber-light);
+        color: var(--amber-dark);
+      }
+      .badge-red {
+        background: var(--red-light);
+        color: var(--red-dark);
+      }
+      .badge-blue {
+        background: var(--blue-light);
+        color: var(--blue-dark);
+      }
+      .badge-gray {
+        background: var(--surface-alt);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+      }
+
+      .sensor-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+      .sensor-tile {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 16px 18px;
+        box-shadow: var(--shadow-sm);
+        transition: border-color 0.3s;
+      }
+      .sensor-tile.warn {
+        border-color: var(--amber);
+      }
+      .sensor-tile.crit {
+        border-color: var(--red);
+        box-shadow:
+          0 0 0 3px var(--red-light),
+          var(--shadow-sm);
+      }
+      .sensor-tile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .sensor-name {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+      }
+      .sensor-val {
+        font-family: var(--mono);
+        font-size: 28px;
+        font-weight: 500;
+        color: var(--text-primary);
+        line-height: 1;
+      }
+      .sensor-val .unit {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-left: 2px;
+      }
+      .sensor-track {
+        height: 4px;
+        background: var(--surface-alt);
+        border-radius: 2px;
+        margin-top: 12px;
+        overflow: hidden;
+      }
+      .sensor-fill {
+        height: 100%;
+        border-radius: 2px;
+        background: var(--blue);
+        transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .sensor-fill.warn {
+        background: var(--amber);
+      }
+      .sensor-fill.crit {
+        background: var(--red);
+      }
+      .sensor-meta {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 8px;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 16px;
+      }
+      .chart-area {
+        padding: 20px;
+      }
+      canvas {
+        display: block;
+      }
+
+      .alert-log {
+        max-height: 240px;
+        overflow-y: auto;
+      }
+      .alert-entry {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--border);
+        animation: slideDown 0.3s ease;
+      }
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .alert-entry:last-child {
+        border-bottom: none;
+      }
+      .alert-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        margin-top: 5px;
+        flex-shrink: 0;
+      }
+      .alert-dot-green {
+        background: var(--green);
+      }
+      .alert-dot-amber {
+        background: var(--amber);
+      }
+      .alert-dot-red {
+        background: var(--red);
+      }
+      .alert-msg {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+      .alert-time {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .sta-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .sta-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+      }
+      .sta-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+      }
+      .sta-card.sense::before {
+        background: var(--blue);
+      }
+      .sta-card.think::before {
+        background: var(--teal);
+      }
+      .sta-card.act::before {
+        background: var(--green);
+      }
+      .sta-number {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .sta-label {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+      .sta-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 16px;
+      }
+      .sta-items {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .sta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--text-secondary);
+        padding: 6px 10px;
+        background: var(--surface-alt);
+        border-radius: var(--radius-sm);
+      }
+      .sta-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .sense .sta-dot {
+        background: var(--blue);
+      }
+      .think .sta-dot {
+        background: var(--teal);
+      }
+      .act .sta-dot {
+        background: var(--green);
+      }
+
+      .spec-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .perf-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+      }
+      .perf-row:last-child {
+        border-bottom: none;
+      }
+      .perf-label {
+        color: var(--text-secondary);
+      }
+      .mono-val {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .crop-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+      .crop-btn {
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface-alt);
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-family: var(--sans);
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .crop-btn:hover {
+        border-color: var(--blue);
+        color: var(--text-primary);
+        background: var(--surface);
+      }
+      .crop-btn.active {
+        border-color: var(--blue);
+        background: var(--blue-light);
+        color: var(--blue-dark);
+        font-weight: 600;
+      }
+      .crop-params {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .param-block {
+        background: var(--surface-alt);
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+      }
+      .param-name {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .param-val {
+        font-family: var(--mono);
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--text-primary);
+        line-height: 1;
+      }
+      .param-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+      .param-bar {
+        height: 3px;
+        background: var(--border);
+        border-radius: 2px;
+        margin-top: 10px;
+        overflow: hidden;
+      }
+      .param-bar-fill {
+        height: 100%;
+        background: var(--blue);
+        border-radius: 2px;
+        transition: width 0.6s ease;
+      }
+      .crop-info-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .info-block {
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        border: 1px solid;
+      }
+      .info-block.shelf {
+        background: var(--green-light);
+        border-color: rgba(22, 163, 74, 0.2);
+      }
+      .info-block.arb {
+        background: var(--amber-light);
+        border-color: rgba(217, 119, 6, 0.2);
+      }
+      .info-block-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 4px;
+      }
+      .info-block.shelf .info-block-label {
+        color: var(--green-dark);
+      }
+      .info-block.arb .info-block-label {
+        color: var(--amber-dark);
+      }
+      .info-block-val {
+        font-family: var(--mono);
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+      .info-block-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 3px;
+      }
+
+      .fin-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .fin-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .fin-table td {
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        vertical-align: top;
+      }
+      .fin-table td:last-child {
+        text-align: right;
+        font-family: var(--mono);
+        color: var(--text-secondary);
+        white-space: nowrap;
+      }
+      .fin-table tr:last-child td {
+        border-bottom: none;
+      }
+      .fin-table tr.total td {
+        font-weight: 600;
+        color: var(--text-primary);
+        border-top: 2px solid var(--border);
+        border-bottom: none;
+        padding-top: 14px;
+      }
+      .fin-table tr.total td:last-child {
+        color: var(--blue-dark);
+        font-size: 15px;
+      }
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .kpi-tile {
+        background: var(--surface-alt);
+        border-radius: var(--radius-md);
+        padding: 14px;
+        text-align: center;
+        border: 1px solid var(--border);
+      }
+      .kpi-val {
+        font-family: var(--mono);
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      .kpi-val.green {
+        color: var(--green);
+      }
+      .kpi-val.blue {
+        color: var(--blue);
+      }
+      .kpi-lbl {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 3px;
+        font-weight: 500;
+      }
+
+      .sub-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .sub-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+      }
+      .sub-scheme {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--blue);
+        margin-bottom: 8px;
+      }
+      .sub-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+      }
+      .sub-pct {
+        font-family: var(--mono);
+        font-size: 40px;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1;
+      }
+      .sub-pct sup {
+        font-size: 18px;
+      }
+      .sub-desc {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-top: 10px;
+        line-height: 1.6;
+      }
+
+      footer {
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        text-align: center;
+        padding: 24px 32px;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      @media (max-width: 1000px) {
+        .hero-inner {
+          grid-template-columns: 1fr;
+        }
+        .hero-stats {
+          flex-wrap: wrap;
+        }
+        .sensor-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .dashboard-grid,
+        .spec-grid,
+        .fin-grid,
+        .sta-grid {
+          grid-template-columns: 1fr;
+        }
+        .crop-params {
+          grid-template-columns: 1fr;
+        }
+        .crop-info-row {
+          grid-template-columns: 1fr;
+        }
+        .sub-grid {
+          grid-template-columns: 1fr;
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hero">
+      <div class="hero-inner">
+        <div>
+          <div class="hero-eyebrow">IoT-Enabled Smart Cold Storage</div>
+          <h1>Beyond Temperature.<br />Metabolic Management.</h1>
+          <p class="hero-sub">
+            A Sense–Think–Act framework that monitors chemical atmosphere,
+            predicts equipment failures, and maximises farmer profit through
+            intelligent price arbitrage - purpose-built for Fruits and
+            Vegetables farmers for high income.
+          </p>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-val green">&lt;5%</div>
+            <div class="hero-stat-lbl">Post-harvest loss</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val amber">3×</div>
+            <div class="hero-stat-lbl">Off-season price</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val blue">10mo</div>
+            <div class="hero-stat-lbl">Apple shelf life</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val">99.5%</div>
+            <div class="hero-stat-lbl">Sensor uptime</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ticker-bar">
+      <div class="ticker-inner">
+        <span class="ticker-item"
+          >Unit A · Temp <span id="tk-temp">2.1°C</span></span
+        >
+        <span class="ticker-item"
+          >Ethylene C₂H₄ <span id="tk-eth">4 ppm</span></span
+        >
+        <span class="ticker-item">CO₂ <span id="tk-co2">1,200 ppm</span></span>
+        <span class="ticker-item">O₂ DCA <span>2.5%</span></span>
+        <span class="ticker-item">Solar <span id="tk-sol">4.2 kW</span></span>
+        <span class="ticker-item">VFD <span id="tk-vfd">67%</span></span>
+        <span class="ticker-item">Battery SoC <span>88%</span></span>
+        <span class="ticker-item">Grid draw <span>0.8 kW</span></span>
+        <span class="ticker-item">Uptime <span>99.8%</span></span>
+        <span class="ticker-item">Unit A · Temp <span>2.1°C</span></span>
+        <span class="ticker-item">Ethylene C₂H₄ <span>4 ppm</span></span>
+        <span class="ticker-item">CO₂ <span>1,200 ppm</span></span>
+        <span class="ticker-item">O₂ DCA <span>2.5%</span></span>
+        <span class="ticker-item">Solar <span>4.2 kW</span></span>
+        <span class="ticker-item">VFD <span>67%</span></span>
+        <span class="ticker-item">Battery SoC <span>88%</span></span>
+        <span class="ticker-item">Grid draw <span>0.8 kW</span></span>
+        <span class="ticker-item">Uptime <span>99.8%</span></span>
+      </div>
+    </div>
+
+    <div class="page-tabs" id="pageTabs">
+      <button
+        class="page-tab active"
+        onclick="showTab('dashboard', null, this)"
+      >
+        Live Dashboard
+      </button>
+      <button class="page-tab" onclick="showTab('architecture', null, this)">
+        System Architecture
+      </button>
+      <button class="page-tab" onclick="showTab('crop-ai', null, this)">
+        Crop AI Presets
+      </button>
+      <button class="page-tab" onclick="showTab('financials', null, this)">
+        Financials &amp; ROI
+      </button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="tab-panel active" id="tab-dashboard">
+      <div class="main">
+        <div class="section">
+          <div class="section-title">
+            Atmospheric sensors — Unit A · 10 MT Apple Storage
+          </div>
+          <div class="sensor-grid">
+            <div class="sensor-tile" id="tile-temp">
+              <div class="sensor-tile-header">
+                <div class="sensor-name">Temperature</div>
+                <span class="badge badge-green" id="badge-temp">Optimal</span>
+              </div>
+              <div class="sensor-val">
+                <span id="sv-temp">2.1</span><span class="unit">°C</span>
+              </div>
+              <div class="sensor-track">
+                <div class="sensor-fill" id="bar-temp" style="width: 21%"></div>
+              </div>
+              <div class="sensor-meta">Target 0–2°C · ±0.5°C accuracy</div>
+            </div>
+            <div class="sensor-tile" id="tile-rh">
+              <div class="sensor-tile-header">
+                <div class="sensor-name">Humidity</div>
+                <span class="badge badge-green" id="badge-rh">Optimal</span>
+              </div>
+              <div class="sensor-val">
+                <span id="sv-rh">92</span><span class="unit">%</span>
+              </div>
+              <div class="sensor-track">
+                <div class="sensor-fill" id="bar-rh" style="width: 92%"></div>
+              </div>
+              <div class="sensor-meta">Target 90–95% RH · ±2% accuracy</div>
+            </div>
+            <div class="sensor-tile" id="tile-eth">
+              <div class="sensor-tile-header">
+                <div class="sensor-name">Ethylene C₂H₄</div>
+                <span class="badge badge-green" id="badge-eth">Normal</span>
+              </div>
+              <div class="sensor-val">
+                <span id="sv-eth">4</span><span class="unit">ppm</span>
+              </div>
+              <div class="sensor-track">
+                <div class="sensor-fill" id="bar-eth" style="width: 4%"></div>
+              </div>
+              <div class="sensor-meta">MQ-135 sensor · Alert &gt;15 ppm</div>
+            </div>
+            <div class="sensor-tile" id="tile-co2">
+              <div class="sensor-tile-header">
+                <div class="sensor-name">CO₂ Level</div>
+                <span class="badge badge-green" id="badge-co2">Normal</span>
+              </div>
+              <div class="sensor-val">
+                <span id="sv-co2">1200</span><span class="unit">ppm</span>
+              </div>
+              <div class="sensor-track">
+                <div class="sensor-fill" id="bar-co2" style="width: 40%"></div>
+              </div>
+              <div class="sensor-meta">NDIR sensor · Alert &gt;2,000 ppm</div>
+            </div>
+            <div class="sensor-tile" id="tile-o2">
+              <div class="sensor-tile-header">
+                <div class="sensor-name">O₂ (DCA)</div>
+                <span class="badge badge-blue" id="badge-o2">DCA Active</span>
+              </div>
+              <div class="sensor-val">
+                <span id="sv-o2">2.5</span><span class="unit">%</span>
+              </div>
+              <div class="sensor-track">
+                <div class="sensor-fill" id="bar-o2" style="width: 50%"></div>
+              </div>
+              <div class="sensor-meta">
+                Dynamic Controlled Atmosphere active
+              </div>
+            </div>
+            <div class="sensor-tile" id="tile-solar">
+              <div class="sensor-tile-header">
+                <div class="sensor-name">Solar Output</div>
+                <span class="badge badge-green" id="badge-solar">Charging</span>
+              </div>
+              <div class="sensor-val">
+                <span id="sv-solar">4.2</span><span class="unit">kW</span>
+              </div>
+              <div class="sensor-track">
+                <div
+                  class="sensor-fill"
+                  id="bar-solar"
+                  style="width: 84%"
+                ></div>
+              </div>
+              <div class="sensor-meta">5 kW PV · LFP battery backup</div>
+            </div>
+            <div class="sensor-tile" id="tile-vfd">
+              <div class="sensor-tile-header">
+                <div class="sensor-name">Compressor VFD</div>
+                <span class="badge badge-blue" id="badge-vfd">Saving</span>
+              </div>
+              <div class="sensor-val">
+                <span id="sv-vfd">67</span><span class="unit">%</span>
+              </div>
+              <div class="sensor-track">
+                <div class="sensor-fill" id="bar-vfd" style="width: 67%"></div>
+              </div>
+              <div class="sensor-meta">Variable Frequency Drive · Off-peak</div>
+            </div>
+            <div class="sensor-tile" id="tile-door">
+              <div class="sensor-tile-header">
+                <div class="sensor-name">Door Status</div>
+                <span class="badge badge-green" id="badge-door">Secured</span>
+              </div>
+              <div
+                class="sensor-val"
+                style="font-size: 20px; font-weight: 600; margin-top: 4px"
+                id="sv-door"
+              >
+                Closed
+              </div>
+              <div class="sensor-track">
+                <div class="sensor-fill" id="bar-door" style="width: 0%"></div>
+              </div>
+              <div class="sensor-meta">3 events today · Thermal log active</div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">Telemetry &amp; alerts</div>
+          <div class="dashboard-grid">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">
+                    Temperature trend — last 24 hours
+                  </div>
+                  <div class="card-subtitle">
+                    Multi-point average across 4 sensor zones
+                  </div>
+                </div>
+                <span class="badge badge-gray" style="font-size: 10px"
+                  >Unit A</span
+                >
+              </div>
+              <div class="chart-area">
+                <canvas id="tempChart" height="140"></canvas>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">System alert log</div>
+                <span class="badge badge-blue" id="alertCount">1 logged</span>
+              </div>
+              <div class="alert-log" id="alertLog">
+                <div class="alert-entry">
+                  <div class="alert-dot alert-dot-green"></div>
+                  <div>
+                    <div class="alert-msg">
+                      System nominal. All parameters within safe range.
+                    </div>
+                    <div class="alert-time">Just now</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARCHITECTURE -->
+    <div class="tab-panel" id="tab-architecture">
+      <div class="main">
+        <div class="section">
+          <div class="section-title">Sense → Think → Act framework</div>
+          <div class="sta-grid">
+            <div class="sta-card sense">
+              <div class="sta-number">Layer 01</div>
+              <div class="sta-label">Sense</div>
+              <div class="sta-desc">
+                IoT sensor nodes collect granular atmospheric data from every
+                corner — identifying hot spots and ripening gas pockets
+                invisible to manual inspection.
+              </div>
+              <div class="sta-items">
+                <div class="sta-item">
+                  <span class="sta-dot"></span>Temp &amp; humidity (±0.5°C / ±2%
+                  RH)
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>Ethylene: 0–100 ppm (MQ-135/NDIR)
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>CO₂ &amp; O₂ NDIR monitoring
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>Door events + thermal logging
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>IoT smart energy meters
+                </div>
+              </div>
+            </div>
+            <div class="sta-card think">
+              <div class="sta-number">Layer 02</div>
+              <div class="sta-label">Think</div>
+              <div class="sta-desc">
+                Edge AI models run locally on the gateway — detecting anomalies
+                and predicting equipment failures hours in advance, even without
+                internet connectivity.
+              </div>
+              <div class="sta-items">
+                <div class="sta-item">
+                  <span class="sta-dot"></span>Real-time anomaly detection
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>Compressor failure prediction
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>DCA oxygen optimisation
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>Off-peak energy pre-cooling
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>LoRaWAN fallback (mountain zones)
+                </div>
+              </div>
+            </div>
+            <div class="sta-card act">
+              <div class="sta-number">Layer 03</div>
+              <div class="sta-label">Act</div>
+              <div class="sta-desc">
+                Automated actuators respond within seconds — no human
+                intervention required for routine adjustments or emergency
+                responses.
+              </div>
+              <div class="sta-items">
+                <div class="sta-item">
+                  <span class="sta-dot"></span>VFD compressor modulation
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>Servo-controlled exhaust vents
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>Solenoid valve control
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>SMS / WhatsApp alerts
+                </div>
+                <div class="sta-item">
+                  <span class="sta-dot"></span>Predictive maintenance tickets
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">Technical specifications</div>
+          <div class="spec-grid">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Communication &amp; connectivity</div>
+              </div>
+              <div class="card-body">
+                <div class="perf-row">
+                  <span class="perf-label">Protocol</span
+                  ><span class="badge badge-blue">MQTT / HTTPS</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Primary connectivity</span
+                  ><span class="mono-val">Dual-SIM 4G / 5G</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Fallback (mountain zones)</span
+                  ><span class="badge badge-gray">LoRaWAN</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">API integration</span
+                  ><span class="mono-val">RESTful APIs</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Data heartbeat</span
+                  ><span class="mono-val">Every 5 minutes</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Edge autonomy (offline)</span
+                  ><span class="badge badge-green">Full actuation</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Physical &amp; energy architecture</div>
+              </div>
+              <div class="card-body">
+                <div class="perf-row">
+                  <span class="perf-label">Insulation (PUF panels)</span
+                  ><span class="mono-val">100 mm, R-value ≥ 30</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Solar PV capacity</span
+                  ><span class="mono-val">5 kW minimum</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Battery type</span
+                  ><span class="badge badge-blue">LiFePO₄ (LFP)</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Critical load backup</span
+                  ><span class="mono-val">12 hours</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Physical design</span
+                  ><span class="badge badge-gray">Containerised / Modular</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Deployment</span
+                  ><span class="mono-val">No RCC foundation needed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CROP AI -->
+    <div class="tab-panel" id="tab-crop-ai">
+      <div class="main">
+        <div class="section">
+          <div class="section-title">One-touch crop preset system</div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">
+                  Commodity-specific atmospheric profile
+                </div>
+                <div class="card-subtitle">
+                  Select a crop to load the optimal Temp / RH / O₂ parameters
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="crop-row">
+                <button
+                  class="crop-btn active"
+                  onclick="setCrop('apple', this)"
+                >
+                  🍎 Apple
+                </button>
+                <button class="crop-btn" onclick="setCrop('potato', this)">
+                  🥔 Potato
+                </button>
+                <button class="crop-btn" onclick="setCrop('tomato', this)">
+                  🍅 Tomato
+                </button>
+                <button class="crop-btn" onclick="setCrop('mango', this)">
+                  🥭 Mango
+                </button>
+                <button class="crop-btn" onclick="setCrop('peach', this)">
+                  🍑 Peach
+                </button>
+              </div>
+              <div class="crop-params">
+                <div class="param-block">
+                  <div class="param-name">Temperature</div>
+                  <div class="param-val" id="cp-temp">0–2°C</div>
+                  <div class="param-sub">
+                    Target: <span id="cp-temp-t">1°C</span>
+                  </div>
+                  <div class="param-bar">
+                    <div
+                      class="param-bar-fill"
+                      id="pb-temp"
+                      style="width: 12%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="param-block">
+                  <div class="param-name">Relative Humidity</div>
+                  <div class="param-val" id="cp-rh">90–95%</div>
+                  <div class="param-sub">
+                    Target: <span id="cp-rh-t">92%</span>
+                  </div>
+                  <div class="param-bar">
+                    <div
+                      class="param-bar-fill"
+                      id="pb-rh"
+                      style="width: 92%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="param-block">
+                  <div class="param-name">O₂ Level (DCA)</div>
+                  <div class="param-val" id="cp-o2">1–3%</div>
+                  <div class="param-sub">
+                    Ethylene limit: <span id="cp-eth">10 ppm</span>
+                  </div>
+                  <div class="param-bar">
+                    <div
+                      class="param-bar-fill"
+                      id="pb-o2"
+                      style="width: 25%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+              <div class="crop-info-row">
+                <div class="info-block shelf">
+                  <div class="info-block-label">Projected shelf life</div>
+                  <div class="info-block-val" id="cp-shelf">8–10 months</div>
+                  <div class="info-block-sub">
+                    vs 2–3 months in traditional storage
+                  </div>
+                </div>
+                <div class="info-block arb">
+                  <div class="info-block-label">
+                    Price arbitrage opportunity
+                  </div>
+                  <div class="info-block-val" id="cp-arb">
+                    ₹2,00,000+ per cycle
+                  </div>
+                  <div class="info-block-sub" id="cp-arb-sub">
+                    Sell Apr–May vs Oct harvest
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINANCIALS -->
+    <div class="tab-panel" id="tab-financials">
+      <div class="main">
+        <div class="section">
+          <div class="section-title">
+            Capital expenditure — 10 MT modular unit
+          </div>
+          <div class="fin-grid">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">CAPEX breakdown</div>
+                <div class="card-subtitle">
+                  Per unit · excl. land &amp; civil foundation
+                </div>
+              </div>
+              <div class="card-body">
+                <table class="fin-table">
+                  <tr>
+                    <td>Modular cold room shell (100 mm PUF)</td>
+                    <td>₹4,50,000</td>
+                  </tr>
+                  <tr>
+                    <td>Refrigeration system + VFD compressor</td>
+                    <td>₹3,50,000</td>
+                  </tr>
+                  <tr>
+                    <td>IoT &amp; atmospheric sensor suite</td>
+                    <td>₹1,50,000</td>
+                  </tr>
+                  <tr>
+                    <td>Solar PV + LFP battery (5 kW)</td>
+                    <td>₹5,00,000</td>
+                  </tr>
+                  <tr>
+                    <td>Installation &amp; hilly terrain logistics</td>
+                    <td>₹1,00,000</td>
+                  </tr>
+                  <tr class="total">
+                    <td>Total CAPEX per unit</td>
+                    <td>₹15,50,000</td>
+                  </tr>
+                </table>
+                <div class="kpi-grid">
+                  <div class="kpi-tile">
+                    <div class="kpi-val green">₹82K</div>
+                    <div class="kpi-lbl">Annual OPEX</div>
+                  </div>
+                  <div class="kpi-tile">
+                    <div class="kpi-val blue">50%</div>
+                    <div class="kpi-lbl">Max subsidy (MIDH)</div>
+                  </div>
+                  <div class="kpi-tile">
+                    <div class="kpi-val green">₹2L+</div>
+                    <div class="kpi-lbl">Revenue / cycle</div>
+                  </div>
+                  <div class="kpi-tile">
+                    <div class="kpi-val blue">&lt;5yr</div>
+                    <div class="kpi-lbl">Payback period</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Performance KPIs</div>
+              </div>
+              <div class="card-body">
+                <div class="perf-row">
+                  <span class="perf-label">Weight loss (desiccation)</span
+                  ><span class="badge badge-green">&lt; 3%</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Spoilage reduction</span
+                  ><span class="badge badge-green">&gt; 25%</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Energy efficiency gain</span
+                  ><span class="badge badge-blue">&gt; 20% kWh/ton</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Sensor data uptime</span
+                  ><span class="badge badge-green">99.5%</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Post-harvest loss (traditional)</span
+                  ><span class="badge badge-red">~30%</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Post-harvest loss (SmartChill)</span
+                  ><span class="badge badge-green">&lt; 5%</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Battery backup (critical IoT)</span
+                  ><span class="mono-val">12 hours</span>
+                </div>
+                <div class="perf-row">
+                  <span class="perf-label">Data heartbeat frequency</span
+                  ><span class="mono-val">Every 5 min</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">Government funding routes</div>
+          <div class="sub-grid">
+            <div class="sub-card">
+              <div class="sub-scheme">MIDH</div>
+              <div class="sub-title">Horticulture Mission</div>
+              <div class="sub-pct">35–50<sup>%</sup></div>
+              <div class="sub-desc">
+                Credit-linked back-ended subsidy under Mission for Integrated
+                Development of Horticulture. Primary route for cold room shell
+                and equipment capital.
+              </div>
+            </div>
+            <div class="sub-card">
+              <div class="sub-scheme">RKVY</div>
+              <div class="sub-title">Krishi Vikas Yojana</div>
+              <div class="sub-pct">50<sup>%</sup></div>
+              <div class="sub-desc">
+                Funding under the Infrastructure &amp; Assets component covering
+                the remaining capital. Includes solar installation and IoT
+                equipment.
+              </div>
+            </div>
+            <div class="sub-card">
+              <div class="sub-scheme">PPP Model</div>
+              <div class="sub-title">FPO Partnership</div>
+              <div class="sub-pct">
+                ₹0<br /><span style="font-size: 14px; color: var(--text-muted)"
+                  >State CAPEX</span
+                >
+              </div>
+              <div class="sub-desc">
+                State government provides CAPEX infrastructure. Farmer Producer
+                Organisation manages annual OPEX (₹82,000/yr) from storage fee
+                revenues.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      SmartChill IoT Cold Storage &nbsp;·&nbsp; Demonstration prototype based on
+      research note &nbsp;·&nbsp; Sense–Think–Act framework for enhancing the
+      life of cold stored farmers products
+    </footer>
+
+    <script>
+      const crops = {
+        apple: {
+          temp: "0–2°C",
+          tempT: "1°C",
+          tempB: 12,
+          rh: "90–95%",
+          rhT: "92%",
+          rhB: 92,
+          o2: "1–3%",
+          eth: "10 ppm",
+          o2B: 25,
+          shelf: "8–10 months",
+          arb: "₹2,00,000+ per cycle",
+          arbSub: "Sell Apr–May vs Oct harvest",
+        },
+        potato: {
+          temp: "2–4°C",
+          tempT: "3°C",
+          tempB: 25,
+          rh: "90–95%",
+          rhT: "93%",
+          rhB: 93,
+          o2: "3–5%",
+          eth: "5 ppm",
+          o2B: 40,
+          shelf: "6–8 months",
+          arb: "₹80,000+ per cycle",
+          arbSub: "Sell May–Jun vs Oct harvest",
+        },
+        tomato: {
+          temp: "8–12°C",
+          tempT: "10°C",
+          tempB: 40,
+          rh: "90–95%",
+          rhT: "92%",
+          rhB: 92,
+          o2: "2–4%",
+          eth: "2 ppm",
+          o2B: 30,
+          shelf: "4–6 weeks",
+          arb: "₹2,00,000+ per cycle",
+          arbSub: "₹10–15 harvest → ₹40–60 off-season",
+        },
+        mango: {
+          temp: "10–13°C",
+          tempT: "12°C",
+          tempB: 48,
+          rh: "85–90%",
+          rhT: "87%",
+          rhB: 87,
+          o2: "3–5%",
+          eth: "15 ppm",
+          o2B: 40,
+          shelf: "3–5 months",
+          arb: "₹1,50,000+ per cycle",
+          arbSub: "Sell Oct–Nov vs Jun harvest",
+        },
+        peach: {
+          temp: "0–2°C",
+          tempT: "1°C",
+          tempB: 12,
+          rh: "90–95%",
+          rhT: "90%",
+          rhB: 90,
+          o2: "1–2%",
+          eth: "5 ppm",
+          o2B: 15,
+          shelf: "3–6 months",
+          arb: "₹1,20,000+ per cycle",
+          arbSub: "Sell Dec–Jan vs Jul harvest",
+        },
+      };
+
+      function setCrop(key, btn) {
+        const c = crops[key];
+        [
+          "cp-temp",
+          "cp-rh",
+          "cp-o2",
+          "cp-eth",
+          "cp-shelf",
+          "cp-arb",
+          "cp-arb-sub",
+          "cp-temp-t",
+          "cp-rh-t",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const map = {
+            "cp-temp": c.temp,
+            "cp-rh": c.rh,
+            "cp-o2": c.o2,
+            "cp-eth": c.eth,
+            "cp-shelf": c.shelf,
+            "cp-arb": c.arb,
+            "cp-arb-sub": c.arbSub,
+            "cp-temp-t": c.tempT,
+            "cp-rh-t": c.rhT,
+          };
+          el.textContent = map[id];
+        });
+        document.getElementById("pb-temp").style.width = c.tempB + "%";
+        document.getElementById("pb-rh").style.width = c.rhB + "%";
+        document.getElementById("pb-o2").style.width = c.o2B + "%";
+        document
+          .querySelectorAll(".crop-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+      }
+
+      function showTab(id, navBtn, tabBtn) {
+        document
+          .querySelectorAll(".tab-panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".page-tab")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-link")
+          .forEach((l) => l.classList.remove("active"));
+        document.getElementById("tab-" + id).classList.add("active");
+        if (tabBtn) tabBtn.classList.add("active");
+        if (navBtn) navBtn.classList.add("active");
+        if (id === "dashboard")
+          setTimeout(() => {
+            resizeChart();
+            drawChart();
+          }, 50);
+      }
+
+      const state = {
+        temp: 2.1,
+        rh: 92,
+        eth: 4,
+        co2: 1200,
+        o2: 2.5,
+        solar: 4.2,
+        vfd: 67,
+      };
+      function r(a, b) {
+        return a + Math.random() * (b - a);
+      }
+      function clamp(v, a, b) {
+        return Math.max(a, Math.min(b, v));
+      }
+
+      const ALERTS = [
+        { msg: "VFD modulated — off-peak pre-cooling active.", type: "green" },
+        {
+          msg: "Ethylene spike in Zone 3. Exhaust vent opened 30s.",
+          type: "amber",
+        },
+        { msg: "Solar charging at peak. Grid draw minimised.", type: "green" },
+        {
+          msg: "Compressor health nominal. Vibration within spec.",
+          type: "green",
+        },
+        {
+          msg: "CO₂ warning cleared. Ventilation cycle complete.",
+          type: "green",
+        },
+        { msg: "Door opened — thermal leakage event logged.", type: "amber" },
+        {
+          msg: "Compressor current +8% above baseline. Service logged.",
+          type: "amber",
+        },
+      ];
+      let aIdx = 0,
+        aTotal = 1;
+
+      function upd(id, val) {
+        const e = document.getElementById(id);
+        if (e) e.textContent = val;
+      }
+      function setBadge(id, cls, txt) {
+        const e = document.getElementById(id);
+        if (e) {
+          e.className = "badge badge-" + cls;
+          e.textContent = txt;
+        }
+      }
+      function setTile(id, status) {
+        const e = document.getElementById(id);
+        if (e) e.className = "sensor-tile" + (status ? " " + status : "");
+      }
+      function setBar(id, pct, status) {
+        const e = document.getElementById(id);
+        if (e) {
+          e.style.width = Math.min(100, pct) + "%";
+          e.className =
+            "sensor-fill" +
+            (status === "crit" ? " crit" : status === "warn" ? " warn" : "");
+        }
+      }
+
+      function updateSensors() {
+        state.temp = clamp(state.temp + r(-0.12, 0.15), 0.5, 9);
+        state.rh = clamp(state.rh + r(-0.4, 0.4), 80, 98);
+        state.eth = clamp(state.eth + r(-1.5, 2.5), 0, 50);
+        state.co2 = clamp(state.co2 + r(-50, 70), 400, 3000);
+        state.o2 = clamp(state.o2 + r(-0.08, 0.08), 1, 5);
+        state.solar = clamp(state.solar + r(-0.2, 0.2), 0, 5);
+        state.vfd = clamp(state.vfd + r(-2, 2), 30, 100);
+
+        const tSt = state.temp > 6 ? "crit" : state.temp > 4 ? "warn" : "";
+        upd("sv-temp", state.temp.toFixed(1));
+        setBar("bar-temp", (state.temp / 15) * 100, tSt);
+        setTile("tile-temp", tSt);
+        setBadge(
+          "badge-temp",
+          tSt === "crit" ? "red" : tSt === "warn" ? "amber" : "green",
+          tSt === "crit"
+            ? "High Temp!"
+            : tSt === "warn"
+              ? "Warming"
+              : "Optimal",
+        );
+
+        const rhSt = state.rh < 82 ? "warn" : "";
+        upd("sv-rh", Math.round(state.rh));
+        setBar("bar-rh", state.rh, rhSt);
+        setTile("tile-rh", rhSt);
+        setBadge(
+          "badge-rh",
+          rhSt ? "amber" : "green",
+          rhSt ? "Low RH" : "Optimal",
+        );
+
+        const eSt = state.eth > 30 ? "crit" : state.eth > 15 ? "warn" : "";
+        upd("sv-eth", Math.round(state.eth));
+        setBar("bar-eth", state.eth, eSt);
+        setTile("tile-eth", eSt);
+        setBadge(
+          "badge-eth",
+          eSt === "crit" ? "red" : eSt === "warn" ? "amber" : "green",
+          eSt === "crit"
+            ? "Vent Open!"
+            : eSt === "warn"
+              ? "Elevated"
+              : "Normal",
+        );
+
+        const cSt = state.co2 > 2000 ? "crit" : state.co2 > 1500 ? "warn" : "";
+        upd("sv-co2", Math.round(state.co2));
+        setBar("bar-co2", (state.co2 / 3000) * 100, cSt);
+        setTile("tile-co2", cSt);
+        setBadge(
+          "badge-co2",
+          cSt === "crit" ? "red" : cSt === "warn" ? "amber" : "green",
+          cSt === "crit" ? "Fan On!" : cSt === "warn" ? "Elevated" : "Normal",
+        );
+
+        upd("sv-o2", state.o2.toFixed(1));
+        setBar("bar-o2", state.o2 * 20, "");
+        upd("sv-solar", state.solar.toFixed(1));
+        setBar("bar-solar", (state.solar / 5) * 100, "");
+        upd("sv-vfd", Math.round(state.vfd));
+        setBar("bar-vfd", state.vfd, "");
+
+        upd("tk-temp", state.temp.toFixed(1) + "°C");
+        upd("tk-eth", Math.round(state.eth) + " ppm");
+        upd("tk-co2", Math.round(state.co2).toLocaleString() + " ppm");
+        upd("tk-sol", state.solar.toFixed(1) + " kW");
+        upd("tk-vfd", Math.round(state.vfd) + "%");
+
+        if (Math.random() < 0.2) pushAlert();
+        updateChart(state.temp);
+      }
+
+      function pushAlert() {
+        const a = ALERTS[aIdx % ALERTS.length];
+        aIdx++;
+        aTotal++;
+        const now = new Date();
+        const time =
+          now.getHours().toString().padStart(2, "0") +
+          ":" +
+          now.getMinutes().toString().padStart(2, "0");
+        const log = document.getElementById("alertLog");
+        if (!log) return;
+        const div = document.createElement("div");
+        div.className = "alert-entry";
+        div.innerHTML = `<div class="alert-dot alert-dot-${a.type}"></div><div><div class="alert-msg">${a.msg}</div><div class="alert-time">${time}</div></div>`;
+        log.insertBefore(div, log.firstChild);
+        while (log.children.length > 7) log.removeChild(log.lastChild);
+        const b = document.getElementById("alertCount");
+        if (b) b.textContent = aTotal + " logged";
+      }
+
+      const canvas = document.getElementById("tempChart");
+      const ctx = canvas.getContext("2d");
+      const chartData = Array.from({ length: 48 }, () =>
+        clamp(1.5 + r(-1, 1), 0.5, 8),
+      );
+
+      function resizeChart() {
+        const p = canvas.parentElement;
+        canvas.width = p ? p.clientWidth - 40 : 600;
+        canvas.height = 140;
+      }
+      resizeChart();
+      window.addEventListener("resize", () => {
+        resizeChart();
+        drawChart();
+      });
+
+      function drawChart() {
+        const w = canvas.width,
+          h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const lineColor = dark ? "#3b82f6" : "#2563eb";
+        const fillClr = dark ? "rgba(59,130,246,0.18)" : "rgba(37,99,235,0.1)";
+        const gridClr = dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)";
+        const lblClr = dark ? "#64748b" : "#9ca3af";
+
+        const pts = chartData.map((v, i) => ({
+          x: (i / (chartData.length - 1)) * w,
+          y: h - (v / 12) * (h - 24) - 12,
+        }));
+
+        [2, 4, 6, 8].forEach((v) => {
+          const y = h - (v / 12) * (h - 24) - 12;
+          ctx.beginPath();
+          ctx.moveTo(30, y);
+          ctx.lineTo(w, y);
+          ctx.strokeStyle = gridClr;
+          ctx.lineWidth = 1;
+          ctx.setLineDash([]);
+          ctx.stroke();
+          ctx.fillStyle = lblClr;
+          ctx.font = "10px JetBrains Mono,monospace";
+          ctx.fillText(v + "°", 2, y + 3);
+        });
+
+        const thY = h - (4 / 12) * (h - 24) - 12;
+        ctx.beginPath();
+        ctx.moveTo(30, thY);
+        ctx.lineTo(w, thY);
+        ctx.strokeStyle = "rgba(220,38,38,0.3)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "rgba(220,38,38,0.5)";
+        ctx.font = "10px JetBrains Mono,monospace";
+        ctx.fillText("4°C threshold", w - 90, thY - 4);
+
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, fillClr);
+        grad.addColorStop(1, "transparent");
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, h);
+        pts.forEach((p) => ctx.lineTo(p.x, p.y));
+        ctx.lineTo(pts[pts.length - 1].x, h);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.beginPath();
+        pts.forEach((p, i) =>
+          i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y),
+        );
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 2;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+      }
+      drawChart();
+
+      function updateChart(v) {
+        chartData.push(v);
+        if (chartData.length > 48) chartData.shift();
+        drawChart();
+      }
+
+      setInterval(updateSensors, 2800);
+      updateSensors();
+    </script>
+  </body>
+</html>
